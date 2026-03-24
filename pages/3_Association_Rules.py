@@ -5,22 +5,21 @@ import plotly.express as px
 import plotly.graph_objects as go
 from utils.helpers import apply_theme, section_header, show_code, log_to_report, PALETTE, check_data
 
-st.set_page_config(page_title="Association Rules | DataMineHub", page_icon="🔗", layout="wide")
+st.set_page_config(page_title="Association Rules | DataMineHub",  layout="wide")
 
 ok, df = check_data()
 if not ok:
     st.stop()
 
-section_header("Frequent Patterns & Association Rules", "Apriori algorithm, support, confidence, lift", "🔗")
+section_header("Frequent Patterns & Association Rules", "Apriori algorithm, support, confidence, lift")
 
-# ─── Detect suitable columns ─────────────────────────────────────────────────
-
+# --- Detect suitable columns ---
 # For retail data: InvoiceNo + Description
 # For generic data: user picks transaction ID col + item col
 has_retail_cols = all(c in df.columns for c in ["InvoiceNo", "Description"])
 
 with st.sidebar:
-    st.markdown("### ⚙️ Association Rules Config")
+    st.markdown("### Association Rules Config")
 
     if has_retail_cols:
         st.success("Retail dataset detected!")
@@ -41,10 +40,9 @@ with st.sidebar:
     max_items = st.slider("Max items per rule", 2, 6, 3, key="ar_max")
     top_n_rules = st.slider("Top N rules to display", 5, 50, 15, key="ar_topn")
 
-# ─── Build Basket ────────────────────────────────────────────────────────────
-
+# --- Build Basket ---
 st.markdown('<div style="height:1px;background:linear-gradient(90deg,transparent,#6C63FF,transparent);margin:2rem 0;"></div>', unsafe_allow_html=True)
-section_header("Step 1: Build Transaction Baskets", "Group items by transaction", "🛒")
+section_header("Step 1: Build Transaction Baskets", "Group items by transaction")
 
 @st.cache_data
 def build_baskets(data, t_col, i_col, max_len):
@@ -84,7 +82,7 @@ try:
 # Build transaction baskets
 basket = df.groupby(['{trans_col}', '{item_col}']).size().unstack(fill_value=0)
 basket = (basket > 0).astype(bool)
-print(f"Baskets: {{basket.shape[0]}} transactions × {{basket.shape[1]}} items")
+print(f"Baskets: {{basket.shape[0]}} transactions x {{basket.shape[1]}} items")
 """)
 
 except Exception as e:
@@ -92,10 +90,9 @@ except Exception as e:
     st.info("Make sure you selected the correct Transaction ID and Item columns.")
     st.stop()
 
-# ─── Apriori ─────────────────────────────────────────────────────────────────
-
+# --- Apriori ---
 st.markdown('<div style="height:1px;background:linear-gradient(90deg,transparent,#FF6584,transparent);margin:2rem 0;"></div>', unsafe_allow_html=True)
-section_header("Step 2: Mine Frequent Itemsets (Apriori)", "Adjust min_support to find patterns", "⛏️")
+section_header("Step 2: Mine Frequent Itemsets (Apriori)", "Adjust min_support to find patterns")
 
 try:
     from mlxtend.frequent_patterns import apriori, association_rules as gen_rules
@@ -110,7 +107,7 @@ try:
     freq_items["length"] = freq_items["itemsets"].apply(len)
     st.success(f"Found **{len(freq_items)}** frequent itemsets")
 
-    tab_table, tab_chart = st.tabs(["📋 Itemsets Table", "📊 Visualization"])
+    tab_table, tab_chart = st.tabs([" Itemsets Table", " Visualization"])
 
     with tab_table:
         display_fi = freq_items.copy()
@@ -138,10 +135,9 @@ except ImportError:
     st.error("mlxtend not installed. Run: `pip install mlxtend`")
     st.stop()
 
-# ─── Association Rules ───────────────────────────────────────────────────────
-
+# --- Association Rules ---
 st.markdown('<div style="height:1px;background:linear-gradient(90deg,transparent,#2ED47A,transparent);margin:2rem 0;"></div>', unsafe_allow_html=True)
-section_header("Step 3: Generate Association Rules", "Adjust confidence and lift thresholds", "📜")
+section_header("Step 3: Generate Association Rules", "Adjust confidence and lift thresholds")
 
 sort_by = st.selectbox("Sort rules by", ["lift", "confidence", "support", "leverage", "conviction"], key="ar_sort")
 
@@ -168,7 +164,7 @@ try:
     display_rules["antecedents"] = display_rules["antecedents"].apply(lambda x: ", ".join(list(x)))
     display_rules["consequents"] = display_rules["consequents"].apply(lambda x: ", ".join(list(x)))
 
-    tab_rules, tab_scatter, tab_topn = st.tabs(["📋 Rules Table", "📊 Scatter Plot", "🏆 Top Rules"])
+    tab_rules, tab_scatter, tab_topn = st.tabs([" Rules Table", " Scatter Plot", " Top Rules"])
 
     with tab_rules:
         st.dataframe(

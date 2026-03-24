@@ -12,12 +12,11 @@ import matplotlib.pyplot as plt
 from utils.helpers import apply_theme, section_header, metric_card, show_code, log_to_report, PALETTE, check_data
 from utils.data_loader import get_rfm
 
-st.set_page_config(page_title="Clustering | DataMineHub", page_icon="📦", layout="wide")
+st.set_page_config(page_title="Clustering | DataMineHub",  layout="wide")
 
-section_header("Cluster Analysis", "K-Means, Hierarchical, DBSCAN with live parameter tuning", "📦")
+section_header("Cluster Analysis", "K-Means, Hierarchical, DBSCAN with live parameter tuning")
 
-# ─── Data ─────────────────────────────────────────────────────────────────────
-
+# --- Data ---
 ok, raw_df = check_data()
 if not ok:
     st.stop()
@@ -25,7 +24,7 @@ if not ok:
 rfm = get_rfm()
 
 with st.sidebar:
-    st.markdown("### ⚙️ Clustering Config")
+    st.markdown("### Clustering Config")
     data_source = st.radio("Data source", ["Uploaded Dataset", "RFM Features"],
                            index=1 if rfm is not None else 0, key="clust_src")
 
@@ -43,7 +42,7 @@ with st.sidebar:
     viz_mode = st.radio("Visualization", ["2D (PCA)", "3D (PCA)"], key="clust_viz")
 
 if not feature_cols or len(feature_cols) < 2:
-    st.info("👈 Select at least 2 numeric features from the sidebar.")
+    st.info(" Select at least 2 numeric features from the sidebar.")
     st.stop()
 
 # Prepare data
@@ -66,18 +65,14 @@ n_comp = 3 if viz_mode == "3D (PCA)" else 2
 pca = PCA(n_components=min(n_comp, X.shape[1]))
 X_pca = pca.fit_transform(X)
 
-# ─── Algorithm Tabs ──────────────────────────────────────────────────────────
-
-tab_km, tab_hier, tab_db, tab_compare = st.tabs(["📍 K-Means", "🏔️ Hierarchical", "🔷 DBSCAN", "🏆 Compare"])
+# --- Algorithm Tabs ---
+tab_km, tab_hier, tab_db, tab_compare = st.tabs([" K-Means", " Hierarchical", " DBSCAN", " Compare"])
 
 results = {}
 
-# ═══════════════════════════════════════════════════════════════════════════
 # K-MEANS
-# ═══════════════════════════════════════════════════════════════════════════
-
 with tab_km:
-    section_header("K-Means Clustering", "Partitioning method — adjust K and see clusters reform", "📍")
+    section_header("K-Means Clustering", "Partitioning method - adjust K and see clusters reform")
 
     c_left, c_right = st.columns([1, 2])
 
@@ -112,7 +107,7 @@ with tab_km:
 
     # Elbow method
     if show_elbow:
-        st.markdown("#### 📐 Elbow Method")
+        st.markdown("#### Elbow Method")
         inertias = []
         sils = []
         k_range = range(2, min(12, len(X)))
@@ -137,7 +132,7 @@ with tab_km:
             st.plotly_chart(fig, use_container_width=True)
 
     # Cluster profiling
-    st.markdown("#### 📋 Cluster Profiles")
+    st.markdown("#### Cluster Profiles")
     profile = X_raw.copy()
     profile["Cluster"] = labels_km
     st.dataframe(profile.groupby("Cluster").agg(["mean", "std", "count"]).round(2),
@@ -154,12 +149,9 @@ print(f"Silhouette: {{silhouette_score(X, labels):.4f}}")
 print(f"Inertia: {{km.inertia_:.1f}}")
 """)
 
-# ═══════════════════════════════════════════════════════════════════════════
 # HIERARCHICAL
-# ═══════════════════════════════════════════════════════════════════════════
-
 with tab_hier:
-    section_header("Hierarchical Clustering", "Agglomerative — with dendrogram", "🏔️")
+    section_header("Hierarchical Clustering", "Agglomerative - with dendrogram")
 
     c_left, c_right = st.columns([1, 2])
 
@@ -193,7 +185,7 @@ with tab_hier:
         st.plotly_chart(fig, use_container_width=True)
 
     # Dendrogram
-    st.markdown("#### 🌳 Dendrogram")
+    st.markdown("#### Dendrogram")
     max_dendro_samples = min(100, len(X))
     X_dendro = X[:max_dendro_samples]
     Z = linkage(X_dendro, method=h_linkage)
@@ -224,12 +216,9 @@ Z = linkage(X[:100], method='{h_linkage}')
 dendrogram(Z, truncate_mode='lastp', p=30)
 """)
 
-# ═══════════════════════════════════════════════════════════════════════════
 # DBSCAN
-# ═══════════════════════════════════════════════════════════════════════════
-
 with tab_db:
-    section_header("DBSCAN", "Density-based — detects arbitrary shapes + noise", "🔷")
+    section_header("DBSCAN", "Density-based - detects arbitrary shapes + noise")
 
     c_left, c_right = st.columns([1, 2])
 
@@ -279,12 +268,9 @@ n_noise = (labels == -1).sum()
 print(f"Clusters: {{n_clusters}}, Noise: {{n_noise}}")
 """)
 
-# ═══════════════════════════════════════════════════════════════════════════
 # COMPARISON
-# ═══════════════════════════════════════════════════════════════════════════
-
 with tab_compare:
-    section_header("Method Comparison", "Side-by-side evaluation", "🏆")
+    section_header("Method Comparison", "Side-by-side evaluation")
 
     if results:
         comp_df = pd.DataFrame({

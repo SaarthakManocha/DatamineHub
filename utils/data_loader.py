@@ -34,7 +34,7 @@ def load_default_dataset():
     # Standardize column names
     col_map = {}
     for col in df.columns:
-        lower = col.lower().replace(" ", "")
+        lower = col.lower().replace(" ")
         if "invoice" in lower and "date" not in lower and "no" not in lower:
             col_map[col] = "InvoiceNo"
         elif "invoicedate" in lower or ("invoice" in lower and "date" in lower):

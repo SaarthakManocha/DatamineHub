@@ -4,8 +4,7 @@ import plotly.graph_objects as go
 import pandas as pd
 import numpy as np
 
-# ─── Consistent Plotly Theme ────────────────────────────────────────────────
-
+# --- Consistent Plotly Theme ---
 COLORS = {
     "primary": "#6C63FF",
     "secondary": "#FF6584",
@@ -42,14 +41,13 @@ def apply_theme(fig):
     return fig
 
 
-# ─── Metric Cards ───────────────────────────────────────────────────────────
-
+# --- Metric Cards ---
 def metric_card(label, value, delta=None, color="primary"):
     """Render a styled metric card."""
     c = COLORS.get(color, color)
     delta_html = ""
     if delta is not None:
-        arrow = "▲" if delta > 0 else "▼" if delta < 0 else "●"
+        arrow = "" if delta > 0 else "" if delta < 0 else ""
         delta_color = "#2ED47A" if delta > 0 else "#EB5757" if delta < 0 else "#8B8D97"
         delta_html = f'<span style="color:{delta_color};font-size:0.85rem;">{arrow} {abs(delta):.2f}</span>'
 
@@ -79,16 +77,14 @@ def section_header(title, subtitle=None, icon=""):
     """, unsafe_allow_html=True)
 
 
-# ─── Code Mirror ─────────────────────────────────────────────────────────────
-
+# --- Code Mirror ---
 def show_code(code_string, language="python"):
     """Show a collapsible Python code snippet (Live Code Mirror)."""
-    with st.expander("🐍 View Python Code", expanded=False):
+    with st.expander(" View Python Code", expanded=False):
         st.code(code_string.strip(), language=language)
 
 
-# ─── Report Helpers ──────────────────────────────────────────────────────────
-
+# --- Report Helpers ---
 def log_to_report(section, content):
     """Append content to the session-state report log."""
     if "report_log" not in st.session_state:
@@ -105,7 +101,7 @@ def generate_report_html():
 <html>
 <head>
 <meta charset="utf-8">
-<title>DataMineHub — Analysis Report</title>
+<title>DataMineHub - Analysis Report</title>
 <style>
 body { font-family: 'Segoe UI', sans-serif; background: #0E1117; color: #FAFAFA; max-width: 900px; margin: 0 auto; padding: 2rem; }
 h1 { color: #6C63FF; border-bottom: 2px solid #6C63FF; padding-bottom: 0.5rem; }
@@ -120,7 +116,7 @@ th { background: #1A1D29; color: #6C63FF; }
 </style>
 </head>
 <body>
-<h1>📊 DataMineHub — Analysis Report</h1>
+<h1> DataMineHub - Analysis Report</h1>
 <p style="color:#8B8D97;">Auto-generated report of data mining analysis session.</p>
 """
     for entry in st.session_state["report_log"]:
@@ -131,18 +127,17 @@ th { background: #1A1D29; color: #6C63FF; }
     return html
 
 
-# ─── Data Checks ─────────────────────────────────────────────────────────────
-
+# --- Data Checks ---
 def check_data(require_numeric=False, min_cols=1):
     """Check that data is loaded and valid. Returns (True, df) or (False, None)."""
     from utils.data_loader import get_data
     df = get_data()
     if df is None:
-        st.warning("⚠️ No dataset loaded. Go to the **Home** page and upload a CSV or load the default dataset.")
+        st.warning(" No dataset loaded. Go to the **Home** page and upload a CSV or load the default dataset.")
         return False, None
     if require_numeric:
         num_cols = df.select_dtypes(include=[np.number]).columns.tolist()
         if len(num_cols) < min_cols:
-            st.warning(f"⚠️ Need at least {min_cols} numeric column(s). Found {len(num_cols)}.")
+            st.warning(f" Need at least {min_cols} numeric column(s). Found {len(num_cols)}.")
             return False, None
     return True, df

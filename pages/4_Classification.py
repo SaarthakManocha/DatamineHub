@@ -19,12 +19,11 @@ from sklearn.preprocessing import StandardScaler, LabelEncoder
 from utils.helpers import apply_theme, section_header, metric_card, show_code, log_to_report, PALETTE, check_data
 from utils.data_loader import get_rfm
 
-st.set_page_config(page_title="Classification | DataMineHub", page_icon="🎯", layout="wide")
+st.set_page_config(page_title="Classification | DataMineHub",  layout="wide")
 
-section_header("Classification", "Decision Tree, Naive Bayes, SVM, KNN, Ensembles & model comparison", "🎯")
+section_header("Classification", "Decision Tree, Naive Bayes, SVM, KNN, Ensembles & model comparison")
 
-# ─── Data Source Selection ────────────────────────────────────────────────────
-
+# --- Data Source Selection ---
 ok, raw_df = check_data()
 if not ok:
     st.stop()
@@ -32,7 +31,7 @@ if not ok:
 rfm = get_rfm()
 
 with st.sidebar:
-    st.markdown("### ⚙️ Classification Config")
+    st.markdown("### Classification Config")
 
     data_source = st.radio("Data source", ["Uploaded Dataset", "RFM Features (from retail data)"],
                            index=1 if rfm is not None else 0, key="cls_source")
@@ -49,10 +48,9 @@ if len(numeric_cols) < 1:
     st.warning("Need at least 1 numeric column for classification.")
     st.stop()
 
-# ─── Feature / Target Selection ──────────────────────────────────────────────
-
+# --- Feature / Target Selection ---
 st.markdown('<div style="height:1px;background:linear-gradient(90deg,transparent,#6C63FF,transparent);margin:2rem 0;"></div>', unsafe_allow_html=True)
-section_header("Step 1: Select Features & Target", "Choose what to predict", "🎛️")
+section_header("Step 1: Select Features & Target", "Choose what to predict")
 
 with st.sidebar:
     # Smart default: if 'HighValue' exists, use it as target
@@ -71,7 +69,7 @@ with st.sidebar:
     random_state = st.number_input("Random seed", 0, 999, 42, key="cls_seed")
 
 if not feature_cols:
-    st.info("👈 Select feature columns from the sidebar.")
+    st.info(" Select feature columns from the sidebar.")
     st.stop()
 
 # Prepare data
@@ -104,17 +102,16 @@ with c2:
 with c3:
     st.metric("Classes", f"{y.nunique()}")
 
-# ─── Algorithm Selection ─────────────────────────────────────────────────────
-
+# --- Algorithm Selection ---
 st.markdown('<div style="height:1px;background:linear-gradient(90deg,transparent,#FF6584,transparent);margin:2rem 0;"></div>', unsafe_allow_html=True)
-section_header("Step 2: Select & Configure Algorithms", "Check any combination to compare", "🧠")
+section_header("Step 2: Select & Configure Algorithms", "Check any combination to compare")
 
 col_algo1, col_algo2, col_algo3 = st.columns(3)
 
 models = {}
 
 with col_algo1:
-    if st.checkbox("🌳 Decision Tree", value=True, key="cls_dt"):
+    if st.checkbox(" Decision Tree", value=True, key="cls_dt"):
         dt_depth = st.slider("Max depth", 1, 20, 5, key="cls_dt_depth")
         dt_crit = st.selectbox("Criterion", ["gini", "entropy"], key="cls_dt_crit")
         models["Decision Tree"] = {
@@ -122,13 +119,13 @@ with col_algo1:
             "code": f"DecisionTreeClassifier(max_depth={dt_depth}, criterion='{dt_crit}')",
         }
 
-    if st.checkbox("📊 Naive Bayes", value=True, key="cls_nb"):
+    if st.checkbox(" Naive Bayes", value=True, key="cls_nb"):
         models["Naive Bayes"] = {
             "model": GaussianNB(),
             "code": "GaussianNB()",
         }
 
-    if st.checkbox("🚀 AdaBoost", value=False, key="cls_ada"):
+    if st.checkbox(" AdaBoost", value=False, key="cls_ada"):
         ada_n = st.slider("N estimators (Ada)", 10, 200, 50, 10, key="cls_ada_n")
         models["AdaBoost"] = {
             "model": AdaBoostClassifier(n_estimators=ada_n, random_state=random_state, algorithm="SAMME"),
@@ -136,7 +133,7 @@ with col_algo1:
         }
 
 with col_algo2:
-    if st.checkbox("🌲 Random Forest", value=True, key="cls_rf"):
+    if st.checkbox(" Random Forest", value=True, key="cls_rf"):
         rf_n = st.slider("N estimators (RF)", 10, 300, 100, 10, key="cls_rf_n")
         rf_depth = st.slider("Max depth (RF)", 1, 30, 10, key="cls_rf_depth")
         models["Random Forest"] = {
@@ -144,7 +141,7 @@ with col_algo2:
             "code": f"RandomForestClassifier(n_estimators={rf_n}, max_depth={rf_depth})",
         }
 
-    if st.checkbox("📈 Gradient Boosting", value=False, key="cls_gb"):
+    if st.checkbox(" Gradient Boosting", value=False, key="cls_gb"):
         gb_n = st.slider("N estimators (GB)", 10, 300, 100, 10, key="cls_gb_n")
         gb_lr = st.slider("Learning rate (GB)", 0.01, 1.0, 0.1, 0.01, key="cls_gb_lr")
         models["Gradient Boosting"] = {
@@ -153,7 +150,7 @@ with col_algo2:
         }
 
 with col_algo3:
-    if st.checkbox("🔮 SVM", value=False, key="cls_svm"):
+    if st.checkbox(" SVM", value=False, key="cls_svm"):
         svm_kernel = st.selectbox("Kernel", ["rbf", "linear", "poly"], key="cls_svm_k")
         svm_c = st.slider("C (regularization)", 0.1, 10.0, 1.0, 0.1, key="cls_svm_c")
         models["SVM"] = {
@@ -161,7 +158,7 @@ with col_algo3:
             "code": f"SVC(kernel='{svm_kernel}', C={svm_c}, probability=True)",
         }
 
-    if st.checkbox("👥 KNN", value=False, key="cls_knn"):
+    if st.checkbox(" KNN", value=False, key="cls_knn"):
         knn_k = st.slider("K neighbors", 1, 25, 5, key="cls_knn_k")
         knn_metric = st.selectbox("Distance", ["euclidean", "manhattan", "minkowski"], key="cls_knn_m")
         models["KNN"] = {
@@ -170,14 +167,13 @@ with col_algo3:
         }
 
 if not models:
-    st.info("☝️ Select at least one algorithm above.")
+    st.info(" Select at least one algorithm above.")
     st.stop()
 
-# ─── Train Models ────────────────────────────────────────────────────────────
-
+# --- Train Models ---
 st.markdown('<div style="height:1px;background:linear-gradient(90deg,transparent,#2ED47A,transparent);margin:2rem 0;"></div>', unsafe_allow_html=True)
 
-if st.button("🚀 Train All Selected Models", use_container_width=True, type="primary"):
+if st.button(" Train All Selected Models", use_container_width=True, type="primary"):
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=test_size, random_state=random_state, stratify=y if y.nunique() <= 20 else None)
 
     # Scale features
@@ -212,16 +208,15 @@ if st.button("🚀 Train All Selected Models", use_container_width=True, type="p
 
         progress.progress((i + 1) / len(models))
 
-    # ─── Results ──────────────────────────────────────────────────────────
-
-    section_header("Step 3: Results", "Confusion matrices, ROC curves & model comparison", "🏆")
+    # --- Results ---
+    section_header("Step 3: Results", "Confusion matrices, ROC curves & model comparison")
 
     # Leaderboard
     results_df = pd.DataFrame(results).T.round(4)
     results_df = results_df.sort_values("F1 Score", ascending=False)
     results_df.index.name = "Model"
 
-    st.markdown("### 🏆 Model Leaderboard")
+    st.markdown("### Model Leaderboard")
 
     fig = px.bar(results_df.reset_index().melt(id_vars="Model"),
                  x="Model", y="value", color="variable", barmode="group",
@@ -234,7 +229,7 @@ if st.button("🚀 Train All Selected Models", use_container_width=True, type="p
     st.dataframe(results_df, use_container_width=True)
 
     # Per-model details
-    st.markdown("### 📋 Per-Model Details")
+    st.markdown("### Per-Model Details")
     model_tabs = st.tabs(list(trained_models.keys()))
 
     for tab, (name, info) in zip(model_tabs, trained_models.items()):
@@ -247,7 +242,7 @@ if st.button("🚀 Train All Selected Models", use_container_width=True, type="p
                 # Confusion matrix
                 cm = confusion_matrix(y_test_m, y_pred)
                 fig = px.imshow(cm, text_auto=True, color_continuous_scale="Blues",
-                                title=f"Confusion Matrix — {name}",
+                                title=f"Confusion Matrix - {name}",
                                 labels={"x": "Predicted", "y": "Actual"})
                 fig = apply_theme(fig)
                 st.plotly_chart(fig, use_container_width=True)
@@ -259,7 +254,7 @@ if st.button("🚀 Train All Selected Models", use_container_width=True, type="p
                         y_proba = info["model"].predict_proba(info["X_test"])[:, 1]
                         fpr, tpr, _ = roc_curve(y_test_m, y_proba)
                         roc_auc = auc(fpr, tpr)
-                        fig = px.area(x=fpr, y=tpr, title=f"ROC Curve — {name} (AUC={roc_auc:.3f})",
+                        fig = px.area(x=fpr, y=tpr, title=f"ROC Curve - {name} (AUC={roc_auc:.3f})",
                                       labels={"x": "False Positive Rate", "y": "True Positive Rate"})
                         fig.add_shape(type="line", x0=0, x1=1, y0=0, y1=1, line=dict(dash="dash", color="#8B8D97"))
                         fig.update_traces(fillcolor=PALETTE[0] + "33", line_color=PALETTE[0])
@@ -280,14 +275,14 @@ if st.button("🚀 Train All Selected Models", use_container_width=True, type="p
                     "Importance": info["model"].feature_importances_
                 }).sort_values("Importance", ascending=True)
                 fig = px.bar(imp, x="Importance", y="Feature", orientation="h",
-                             title=f"Feature Importance — {name}",
+                             title=f"Feature Importance - {name}",
                              color="Importance", color_continuous_scale="Viridis")
                 fig = apply_theme(fig)
                 st.plotly_chart(fig, use_container_width=True)
 
             # Decision tree text
             if name == "Decision Tree":
-                with st.expander("🌳 Tree Structure (text)"):
+                with st.expander(" Tree Structure (text)"):
                     tree_text = export_text(info["model"], feature_names=feature_cols, max_depth=5)
                     st.code(tree_text)
 

@@ -8,12 +8,11 @@ from sklearn.preprocessing import StandardScaler
 from utils.helpers import apply_theme, section_header, metric_card, show_code, log_to_report, PALETTE, check_data
 from utils.data_loader import get_rfm
 
-st.set_page_config(page_title="Outlier Detection | DataMineHub", page_icon="🔍", layout="wide")
+st.set_page_config(page_title="Outlier Detection | DataMineHub",  layout="wide")
 
-section_header("Outlier Detection", "Statistical & proximity-based approaches", "🔍")
+section_header("Outlier Detection", "Statistical & proximity-based approaches")
 
-# ─── Data ─────────────────────────────────────────────────────────────────────
-
+# --- Data ---
 ok, raw_df = check_data()
 if not ok:
     st.stop()
@@ -21,7 +20,7 @@ if not ok:
 rfm = get_rfm()
 
 with st.sidebar:
-    st.markdown("### ⚙️ Outlier Detection Config")
+    st.markdown("### Outlier Detection Config")
     data_source = st.radio("Data source", ["Uploaded Dataset", "RFM Features"],
                            index=1 if rfm is not None else 0, key="out_src")
 
@@ -38,7 +37,7 @@ with st.sidebar:
                                   key="out_feats")
 
 if not feature_cols or len(feature_cols) < 1:
-    st.info("👈 Select at least 1 numeric feature from the sidebar.")
+    st.info(" Select at least 1 numeric feature from the sidebar.")
     st.stop()
 
 X_raw = df[feature_cols].dropna()
@@ -54,43 +53,41 @@ if len(X_raw) > MAX_SAMPLES:
 
 X_scaled = StandardScaler().fit_transform(X_raw)
 
-# ─── Method Selection ────────────────────────────────────────────────────────
-
+# --- Method Selection ---
 st.markdown('<div style="height:1px;background:linear-gradient(90deg,transparent,#6C63FF,transparent);margin:2rem 0;"></div>', unsafe_allow_html=True)
-section_header("Select Detection Methods", "Check any combination", "🎛️")
+section_header("Select Detection Methods", "Check any combination")
 
 col1, col2, col3, col4 = st.columns(4)
 
 methods = {}
 
 with col1:
-    if st.checkbox("📊 Z-Score", value=True, key="out_zscore"):
+    if st.checkbox(" Z-Score", value=True, key="out_zscore"):
         z_thresh = st.slider("Z threshold", 1.5, 5.0, 3.0, 0.1, key="out_z_t")
         methods["Z-Score"] = {"threshold": z_thresh}
 
 with col2:
-    if st.checkbox("📦 IQR", value=True, key="out_iqr"):
+    if st.checkbox(" IQR", value=True, key="out_iqr"):
         iqr_mult = st.slider("IQR multiplier", 1.0, 3.0, 1.5, 0.1, key="out_iqr_m")
         methods["IQR"] = {"multiplier": iqr_mult}
 
 with col3:
-    if st.checkbox("🔮 LOF", value=False, key="out_lof"):
+    if st.checkbox(" LOF", value=False, key="out_lof"):
         lof_k = st.slider("N neighbors (LOF)", 5, 50, 20, key="out_lof_k")
         methods["LOF"] = {"n_neighbors": lof_k}
 
 with col4:
-    if st.checkbox("🌲 Isolation Forest", value=False, key="out_iso"):
+    if st.checkbox(" Isolation Forest", value=False, key="out_iso"):
         iso_cont = st.slider("Contamination", 0.01, 0.3, 0.05, 0.01, key="out_iso_c")
         methods["Isolation Forest"] = {"contamination": iso_cont}
 
 if not methods:
-    st.info("☝️ Select at least one detection method.")
+    st.info(" Select at least one detection method.")
     st.stop()
 
-# ─── Run Detection ───────────────────────────────────────────────────────────
-
+# --- Run Detection ---
 st.markdown('<div style="height:1px;background:linear-gradient(90deg,transparent,#FF6584,transparent);margin:2rem 0;"></div>', unsafe_allow_html=True)
-section_header("Detection Results", "Outliers highlighted in each method", "🎯")
+section_header("Detection Results", "Outliers highlighted in each method")
 
 outlier_masks = {}
 
@@ -119,9 +116,8 @@ for name, params in methods.items():
         preds = iso.fit_predict(X_scaled)
         outlier_masks["Isolation Forest"] = (preds == -1)
 
-# ─── Visualize ────────────────────────────────────────────────────────────────
-
-method_tabs = st.tabs(list(outlier_masks.keys()) + ["🔀 Agreement"])
+# --- Visualize ---
+method_tabs = st.tabs(list(outlier_masks.keys()) + [" Agreement"])
 
 # Per-method visualization
 for tab, (name, mask) in zip(method_tabs[:-1], outlier_masks.items()):
@@ -139,18 +135,18 @@ for tab, (name, mask) in zip(method_tabs[:-1], outlier_masks.items()):
 
         labels = np.where(mask, "Outlier", "Normal")
 
-        # Scatter — use first 2 features or PCA
+        # Scatter - use first 2 features or PCA
         if len(feature_cols) >= 2:
             x_col, y_col = feature_cols[0], feature_cols[1]
             fig = px.scatter(X_raw, x=x_col, y=y_col, color=labels,
                              color_discrete_map={"Normal": PALETTE[2], "Outlier": PALETTE[5]},
-                             title=f"{name} — Outlier Detection",
+                             title=f"{name} - Outlier Detection",
                              opacity=0.7)
         else:
             fig = px.scatter(x=range(len(X_raw)), y=X_raw.iloc[:, 0].values,
                              color=labels,
                              color_discrete_map={"Normal": PALETTE[2], "Outlier": PALETTE[5]},
-                             title=f"{name} — Outlier Detection",
+                             title=f"{name} - Outlier Detection",
                              labels={"x": "Index", "y": feature_cols[0]})
         fig = apply_theme(fig)
         fig.update_layout(height=400)
@@ -163,7 +159,7 @@ for tab, (name, mask) in zip(method_tabs[:-1], outlier_masks.items()):
             for col in feature_cols:
                 fig = px.box(plot_data, y=col, color="Outlier",
                              color_discrete_map={"Normal": PALETTE[2], "Outlier": PALETTE[5]},
-                             title=f"{col} — {name}")
+                             title=f"{col} - {name}")
                 fig = apply_theme(fig)
                 st.plotly_chart(fig, use_container_width=True)
 
@@ -200,10 +196,9 @@ outliers = (predictions == -1)
 print(f"Outliers: {{outliers.sum()}} ({{outliers.mean()*100:.1f}}%)")
 """)
 
-# ─── Agreement Analysis ──────────────────────────────────────────────────────
-
+# --- Agreement Analysis ---
 with method_tabs[-1]:
-    section_header("Method Agreement", "Which points do multiple methods flag?", "🔀")
+    section_header("Method Agreement", "Which points do multiple methods flag?")
 
     if len(outlier_masks) >= 2:
         agreement = pd.DataFrame(outlier_masks).astype(int)
@@ -224,7 +219,7 @@ with method_tabs[-1]:
         st.markdown(f"**{consensus.sum()}** points flagged by **≥{min_agree}** method(s) ({consensus.sum()/len(consensus)*100:.1f}%)")
 
         # Impact analysis
-        st.markdown("#### 📈 Impact of Removing Outliers")
+        st.markdown("#### Impact of Removing Outliers")
         c1, c2 = st.columns(2)
         with c1:
             st.markdown("**With outliers**")
@@ -236,7 +231,7 @@ with method_tabs[-1]:
         # Download
         clean_data = X_raw[~consensus]
         csv = clean_data.to_csv(index=False)
-        st.download_button("⬇️ Download Cleaned Data (outliers removed)", csv,
+        st.download_button(" Download Cleaned Data (outliers removed)", csv,
                            "cleaned_no_outliers.csv", "text/csv", use_container_width=True)
 
         log_to_report("Outlier Detection",

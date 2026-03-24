@@ -14,9 +14,9 @@ from sklearn.metrics import accuracy_score, silhouette_score
 from sklearn.preprocessing import StandardScaler
 from utils.helpers import apply_theme, section_header, metric_card, show_code, PALETTE
 
-st.set_page_config(page_title="Playground | DataMineHub", page_icon="🧪", layout="wide")
+st.set_page_config(page_title="Playground | DataMineHub",  layout="wide")
 
-section_header("Synthetic Dataset Playground", "Generate custom 2D shapes and stress-test algorithms", "🧪")
+section_header("Synthetic Dataset Playground", "Generate custom 2D shapes and stress-test algorithms")
 
 st.markdown("""
 <div style="background:linear-gradient(135deg,#6C63FF11,#FF658411);border:1px solid #2A2D3A;border-radius:12px;padding:1.2rem;margin-bottom:1.5rem;">
@@ -28,10 +28,9 @@ st.markdown("""
 </div>
 """, unsafe_allow_html=True)
 
-# ─── Dataset Generation ──────────────────────────────────────────────────────
-
+# --- Dataset Generation ---
 with st.sidebar:
-    st.markdown("### 🧪 Generate Dataset")
+    st.markdown("### Generate Dataset")
     shape = st.selectbox("Shape", ["Blobs", "Moons", "Circles", "Anisotropic", "Varied Density"], key="pg_shape")
     n_samples = st.slider("Number of samples", 100, 2000, 500, 50, key="pg_n")
     noise = st.slider("Noise level", 0.01, 0.5, 0.08, 0.01, key="pg_noise")
@@ -41,7 +40,7 @@ with st.sidebar:
         n_centers = st.slider("Number of centers", 2, 8, 3, key="pg_centers")
 
     st.markdown("---")
-    st.markdown("### 🧠 Algorithm Mode")
+    st.markdown("### Algorithm Mode")
     mode = st.radio("Task", ["Clustering", "Classification"], key="pg_mode")
 
 # Generate data
@@ -57,22 +56,21 @@ elif shape == "Anisotropic":
     X, y_true = make_blobs(n_samples=n_samples, centers=3, random_state=random_seed)
     transformation = [[0.6, -0.6], [-0.4, 0.8]]
     X = np.dot(X, transformation)
-else:  # Varied Density
+else: # Varied Density
     X1, y1 = make_blobs(n_samples=n_samples // 3, centers=[[0, 0]], cluster_std=0.3, random_state=random_seed)
     X2, y2 = make_blobs(n_samples=n_samples // 3, centers=[[3, 3]], cluster_std=1.0, random_state=random_seed)
     X3, y3 = make_blobs(n_samples=n_samples // 3, centers=[[-3, 3]], cluster_std=0.5, random_state=random_seed)
     X = np.vstack([X1, X2, X3])
     y_true = np.hstack([np.zeros(len(y1)), np.ones(len(y2)), np.full(len(y3), 2)]).astype(int)
 
-# ─── Show Generated Data ─────────────────────────────────────────────────────
-
+# --- Show Generated Data ---
 st.markdown('<div style="height:1px;background:linear-gradient(90deg,transparent,#6C63FF,transparent);margin:2rem 0;"></div>', unsafe_allow_html=True)
-section_header("Generated Dataset", f"{shape} — {n_samples} samples, noise={noise}", "📊")
+section_header("Generated Dataset", f"{shape} - {n_samples} samples, noise={noise}")
 
 c1, c2 = st.columns([2, 1])
 with c1:
     fig = px.scatter(x=X[:, 0], y=X[:, 1], color=y_true.astype(str),
-                     title=f"Ground Truth — {shape}",
+                     title=f"Ground Truth - {shape}",
                      labels={"x": "Feature 1", "y": "Feature 2", "color": "True Label"},
                      color_discrete_sequence=PALETTE)
     fig = apply_theme(fig)
@@ -92,12 +90,11 @@ X, y = make_{shape.lower() if shape in ['Blobs','Moons','Circles'] else 'blobs'}
 )
 """)
 
-# ─── Apply Algorithms ────────────────────────────────────────────────────────
-
+# --- Apply Algorithms ---
 st.markdown('<div style="height:1px;background:linear-gradient(90deg,transparent,#FF6584,transparent);margin:2rem 0;"></div>', unsafe_allow_html=True)
 
 if mode == "Clustering":
-    section_header("Apply Clustering Algorithms", "See how each algorithm handles this shape", "⚡")
+    section_header("Apply Clustering Algorithms", "See how each algorithm handles this shape")
 
     algos = st.multiselect("Select algorithms", ["K-Means", "Hierarchical", "DBSCAN"],
                            default=["K-Means", "DBSCAN"], key="pg_cl_algos")
@@ -121,7 +118,7 @@ if mode == "Clustering":
                     "min_samples": st.slider("Min samples", 2, 20, 5, key="pg_db_m"),
                 }
 
-    if algos and st.button("🚀 Run Clustering", use_container_width=True, type="primary"):
+    if algos and st.button(" Run Clustering", use_container_width=True, type="primary"):
         X_scaled = StandardScaler().fit_transform(X)
         result_cols = st.columns(len(algos))
 
@@ -153,8 +150,8 @@ if mode == "Clustering":
                 st.plotly_chart(fig, use_container_width=True)
                 st.caption(f"Clusters: {n_cl} | Silhouette: {sil:.4f}")
 
-else:  # Classification
-    section_header("Apply Classification Algorithms", "Train on this synthetic data", "⚡")
+else: # Classification
+    section_header("Apply Classification Algorithms", "Train on this synthetic data")
 
     algos = st.multiselect("Select algorithms",
                            ["Decision Tree", "Naive Bayes", "Random Forest", "SVM", "KNN"],
@@ -162,7 +159,7 @@ else:  # Classification
 
     test_frac = st.slider("Test split", 0.1, 0.5, 0.3, 0.05, key="pg_cls_split")
 
-    if algos and st.button("🚀 Run Classification", use_container_width=True, type="primary"):
+    if algos and st.button(" Run Classification", use_container_width=True, type="primary"):
         X_train, X_test, y_train, y_test = train_test_split(X, y_true, test_size=test_frac, random_state=42)
         scaler = StandardScaler()
         X_train_s = scaler.fit_transform(X_train)
@@ -211,7 +208,7 @@ else:  # Classification
 
         # Comparison
         if len(results) > 1:
-            st.markdown("### 🏆 Accuracy Comparison")
+            st.markdown("### Accuracy Comparison")
             fig = px.bar(x=list(results.keys()), y=list(results.values()),
                          color=list(results.keys()), color_discrete_sequence=PALETTE,
                          title="Algorithm Accuracy on Synthetic Data",
@@ -219,17 +216,16 @@ else:  # Classification
             fig = apply_theme(fig)
             st.plotly_chart(fig, use_container_width=True)
 
-# ─── Key Takeaways ──────────────────────────────────────────────────────────
-
+# --- Key Takeaways ---
 st.markdown('<div style="height:1px;background:linear-gradient(90deg,transparent,#2ED47A,transparent);margin:2rem 0;"></div>', unsafe_allow_html=True)
-section_header("💡 Key Insights", "What each shape teaches us about algorithms", "")
+section_header(" Key Insights", "What each shape teaches us about algorithms")
 
 insights = {
-    "Blobs": "**Spherical clusters** — K-Means excels here since it assumes spherical, equal-sized clusters. DBSCAN works too if you set eps correctly. This is the 'easy case' for most algorithms.",
-    "Moons": "**Crescent shapes** — K-Means fails completely because it can't handle non-convex shapes. DBSCAN shines here because it follows density. Hierarchical with 'single' linkage can also work.",
-    "Circles": "**Concentric rings** — Another case where K-Means fails. Density-based methods (DBSCAN) handle this well. For classification, SVM with RBF kernel can learn the circular boundary.",
-    "Anisotropic": "**Stretched/elongated clusters** — K-Means struggles because clusters aren't spherical. Hierarchical with 'ward' linkage handles elongated shapes better.",
-    "Varied Density": "**Different cluster densities** — DBSCAN struggles here because a single eps can't fit all densities. K-Means is surprisingly more robust since it just cares about centroids.",
+    "Blobs": "**Spherical clusters** - K-Means excels here since it assumes spherical, equal-sized clusters. DBSCAN works too if you set eps correctly. This is the 'easy case' for most algorithms.",
+    "Moons": "**Crescent shapes** - K-Means fails completely because it can't handle non-convex shapes. DBSCAN shines here because it follows density. Hierarchical with 'single' linkage can also work.",
+    "Circles": "**Concentric rings** - Another case where K-Means fails. Density-based methods (DBSCAN) handle this well. For classification, SVM with RBF kernel can learn the circular boundary.",
+    "Anisotropic": "**Stretched/elongated clusters** - K-Means struggles because clusters aren't spherical. Hierarchical with 'ward' linkage handles elongated shapes better.",
+    "Varied Density": "**Different cluster densities** - DBSCAN struggles here because a single eps can't fit all densities. K-Means is surprisingly more robust since it just cares about centroids.",
 }
 
 st.markdown(f"""

@@ -7,13 +7,13 @@ from sklearn.impute import SimpleImputer
 from sklearn.decomposition import PCA
 from utils.helpers import apply_theme, section_header, metric_card, show_code, log_to_report, PALETTE, check_data
 
-st.set_page_config(page_title="Preprocessing | DataMineHub", page_icon="🧹", layout="wide")
+st.set_page_config(page_title="Preprocessing | DataMineHub",  layout="wide")
 
 ok, df = check_data()
 if not ok:
     st.stop()
 
-section_header("Data Preprocessing", "Cleaning, transformation, reduction & discretization", "🧹")
+section_header("Data Preprocessing", "Cleaning, transformation, reduction & discretization")
 
 numeric_cols = df.select_dtypes(include=[np.number]).columns.tolist()
 
@@ -25,10 +25,9 @@ if not numeric_cols:
 if "preprocessed" not in st.session_state:
     st.session_state["preprocessed"] = None
 
-# ─── Sidebar Controls ────────────────────────────────────────────────────────
-
+# --- Sidebar Controls ---
 with st.sidebar:
-    st.markdown("### ⚙️ Preprocessing Pipeline")
+    st.markdown("### Preprocessing Pipeline")
 
     selected_cols = st.multiselect("Columns to process", numeric_cols, default=numeric_cols[:5] if len(numeric_cols) >= 5 else numeric_cols, key="pp_cols")
 
@@ -41,16 +40,15 @@ with st.sidebar:
     do_pca = st.checkbox("PCA Reduction", value=False, key="pp_pca")
 
 if not selected_cols:
-    st.info("👈 Select columns from the sidebar to start preprocessing.")
+    st.info(" Select columns from the sidebar to start preprocessing.")
     st.stop()
 
 working = df[selected_cols].copy()
 report_steps = []
 
-# ─── 1. Missing Values ──────────────────────────────────────────────────────
-
+# --- 1. Missing Values ---
 st.markdown('<div style="height:1px;background:linear-gradient(90deg,transparent,#6C63FF,transparent);margin:2rem 0;"></div>', unsafe_allow_html=True)
-section_header("1. Missing Values", "Identify and handle missing data", "🕳️")
+section_header("1. Missing Values", "Identify and handle missing data")
 
 missing_counts = working.isnull().sum()
 missing_pct = (missing_counts / len(working) * 100).round(2)
@@ -95,13 +93,12 @@ df_imputed = pd.DataFrame(
 )
 """)
 elif missing_counts.sum() == 0:
-    st.success("✅ No missing values found!")
+    st.success(" No missing values found!")
 
-# ─── 2. Outlier Handling ─────────────────────────────────────────────────────
-
+# --- 2. Outlier Handling ---
 if do_outliers:
     st.markdown('<div style="height:1px;background:linear-gradient(90deg,transparent,#FF6584,transparent);margin:2rem 0;"></div>', unsafe_allow_html=True)
-    section_header("2. Outlier Handling", "Detect and cap outliers", "🔧")
+    section_header("2. Outlier Handling", "Detect and cap outliers")
 
     outlier_method = st.radio("Detection method", ["IQR", "Z-Score"], horizontal=True, key="outlier_method")
 
@@ -165,11 +162,10 @@ for col in df.select_dtypes(include='number').columns:
     df[col] = df[col].clip(lower, upper)
 """)
 
-# ─── 3. Normalization ────────────────────────────────────────────────────────
-
+# --- 3. Normalization ---
 if do_normalize:
     st.markdown('<div style="height:1px;background:linear-gradient(90deg,transparent,#2ED47A,transparent);margin:2rem 0;"></div>', unsafe_allow_html=True)
-    section_header("3. Normalization / Scaling", "Scale features to a common range", "⚖️")
+    section_header("3. Normalization / Scaling", "Scale features to a common range")
 
     norm_method = st.radio("Method", ["Min-Max (0-1)", "Z-Score (StandardScaler)", "Robust Scaler"], horizontal=True, key="norm_method")
 
@@ -213,11 +209,10 @@ df_scaled = pd.DataFrame(
 )
 """)
 
-# ─── 4. Discretization ───────────────────────────────────────────────────────
-
+# --- 4. Discretization ---
 if do_discretize:
     st.markdown('<div style="height:1px;background:linear-gradient(90deg,transparent,#FFB946,transparent);margin:2rem 0;"></div>', unsafe_allow_html=True)
-    section_header("4. Discretization", "Convert continuous features into bins", "📦")
+    section_header("4. Discretization", "Convert continuous features into bins")
 
     disc_method = st.radio("Binning method", ["Equal Width (Uniform)", "Equal Frequency (Quantile)"], horizontal=True, key="disc_method")
     n_bins = st.slider("Number of bins", 2, 20, 5, key="disc_bins")
@@ -228,7 +223,7 @@ if do_discretize:
     col_b, col_a = st.columns(2)
     with col_b:
         st.markdown("**Continuous**")
-        fig = px.histogram(working, x=disc_col, nbins=40, title=f"{disc_col} — Continuous",
+        fig = px.histogram(working, x=disc_col, nbins=40, title=f"{disc_col} - Continuous",
                            color_discrete_sequence=[PALETTE[0]])
         fig = apply_theme(fig)
         st.plotly_chart(fig, use_container_width=True)
@@ -244,7 +239,7 @@ if do_discretize:
                 st.markdown(f"**Discretized ({n_bins} bins)**")
                 fig = px.histogram(working.dropna(subset=[disc_col + "_binned"]),
                                    x=disc_col + "_binned", nbins=n_bins,
-                                   title=f"{disc_col} — {disc_method} ({n_bins} bins)",
+                                   title=f"{disc_col} - {disc_method} ({n_bins} bins)",
                                    color_discrete_sequence=[PALETTE[1]])
                 fig = apply_theme(fig)
                 st.plotly_chart(fig, use_container_width=True)
@@ -259,11 +254,10 @@ df['{disc_col}_binned'] = disc.fit_transform(df[['{disc_col}']])
     except Exception as e:
         st.error(f"Discretization error: {e}")
 
-# ─── 5. PCA ──────────────────────────────────────────────────────────────────
-
+# --- 5. PCA ---
 if do_pca and len(working.select_dtypes(include=[np.number]).columns) >= 2:
     st.markdown('<div style="height:1px;background:linear-gradient(90deg,transparent,#56CCF2,transparent);margin:2rem 0;"></div>', unsafe_allow_html=True)
-    section_header("5. Dimensionality Reduction (PCA)", "Reduce features while preserving variance", "🔽")
+    section_header("5. Dimensionality Reduction (PCA)", "Reduce features while preserving variance")
 
     num_work_cols = working.select_dtypes(include=[np.number]).columns.tolist()
     max_comp = min(len(num_work_cols), 10, len(working.dropna()) - 1)
@@ -308,7 +302,7 @@ if do_pca and len(working.select_dtypes(include=[np.number]).columns) >= 2:
             # 2D scatter of first 2 PCs
             if n_components >= 2:
                 pca_df = pd.DataFrame(transformed[:, :2], columns=["PC1", "PC2"])
-                fig = px.scatter(pca_df, x="PC1", y="PC2", title="PCA — First 2 Components",
+                fig = px.scatter(pca_df, x="PC1", y="PC2", title="PCA - First 2 Components",
                                  color_discrete_sequence=[PALETTE[0]], opacity=0.6)
                 fig = apply_theme(fig)
                 st.plotly_chart(fig, use_container_width=True)
@@ -326,16 +320,15 @@ print(f"Explained variance: {{pca.explained_variance_ratio_}}")
 print(f"Total: {{sum(pca.explained_variance_ratio_)*100:.1f}}%")
 """)
 
-# ─── Download Preprocessed Data ──────────────────────────────────────────────
-
+# --- Download Preprocessed Data ---
 st.markdown('<div style="height:1px;background:linear-gradient(90deg,transparent,#6C63FF,transparent);margin:2rem 0;"></div>', unsafe_allow_html=True)
-section_header("📥 Download Preprocessed Data", "Export the transformed dataset", "")
+section_header(" Download Preprocessed Data", "Export the transformed dataset")
 
 st.session_state["preprocessed"] = working
 st.dataframe(working.head(20), use_container_width=True)
 
 csv = working.to_csv(index=False)
-st.download_button("⬇️ Download as CSV", csv, "preprocessed_data.csv", "text/csv", use_container_width=True)
+st.download_button(" Download as CSV", csv, "preprocessed_data.csv", "text/csv", use_container_width=True)
 
 if report_steps:
     log_to_report("Preprocessing", "<ul>" + "".join(f"<li>{s}</li>" for s in report_steps) + "</ul>")
