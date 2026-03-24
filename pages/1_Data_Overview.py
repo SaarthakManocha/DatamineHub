@@ -16,6 +16,10 @@ if not ok:
 
 section_header("Data Overview & EDA", "Attribute types, statistical descriptions, similarity & dissimilarity")
 
+VIZ_SAMPLE = 5000
+def _sample(data, n=VIZ_SAMPLE):
+    return data.sample(n=n, random_state=42) if len(data) > n else data
+
 # --- Column Selector ---
 numeric_cols = df.select_dtypes(include=[np.number]).columns.tolist()
 categorical_cols = df.select_dtypes(include=["object", "category"]).columns.tolist()
@@ -23,7 +27,7 @@ all_cols = df.columns.tolist()
 
 with st.sidebar:
     st.markdown("### Controls")
-    selected_cols = st.multiselect("Select columns to analyze", all_cols, default=numeric_cols[:5] if len(numeric_cols) >= 5 else numeric_cols)
+    selected_cols = st.multiselect("Select columns to analyze", all_cols, default=numeric_cols[:3] if len(numeric_cols) >= 3 else numeric_cols)
 
 if not selected_cols:
     st.info(" Select at least one column from the sidebar.")
@@ -123,17 +127,17 @@ for col in cols:
         if chart_type == "Histogram":
             n_bins = st.slider("Number of bins", 10, 100, 30, key="nbins_eda")
             for col in vis_cols:
-                fig = px.histogram(df, x=col, nbins=n_bins, title=f"Distribution of {col}",
+                fig = px.histogram(_sample(df), x=col, nbins=n_bins, title=f"Distribution of {col}",
                                    color_discrete_sequence=[PALETTE[0]], opacity=0.85)
                 fig = apply_theme(fig)
                 st.plotly_chart(fig, use_container_width=True)
         elif chart_type == "Box Plot":
-            fig = px.box(df[vis_cols].melt(), x="variable", y="value", color="variable",
+            fig = px.box(_sample(df[vis_cols]).melt(), x="variable", y="value", color="variable",
                          title="Box Plots", color_discrete_sequence=PALETTE)
             fig = apply_theme(fig)
             st.plotly_chart(fig, use_container_width=True)
         else:
-            fig = px.violin(df[vis_cols].melt(), x="variable", y="value", color="variable",
+            fig = px.violin(_sample(df[vis_cols]).melt(), x="variable", y="value", color="variable",
                             box=True, title="Violin Plots", color_discrete_sequence=PALETTE)
             fig = apply_theme(fig)
             st.plotly_chart(fig, use_container_width=True)

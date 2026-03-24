@@ -15,6 +15,12 @@ if not ok:
 
 section_header("Data Preprocessing", "Cleaning, transformation, reduction & discretization")
 
+VIZ_SAMPLE = 5000  # Max rows for plotting
+
+def _sample(data, n=VIZ_SAMPLE):
+    """Sample data for visualization performance."""
+    return data.sample(n=n, random_state=42) if len(data) > n else data
+
 numeric_cols = df.select_dtypes(include=[np.number]).columns.tolist()
 
 if not numeric_cols:
@@ -29,7 +35,7 @@ if "preprocessed" not in st.session_state:
 with st.sidebar:
     st.markdown("### Preprocessing Pipeline")
 
-    selected_cols = st.multiselect("Columns to process", numeric_cols, default=numeric_cols[:5] if len(numeric_cols) >= 5 else numeric_cols, key="pp_cols")
+    selected_cols = st.multiselect("Columns to process", numeric_cols, default=numeric_cols[:3] if len(numeric_cols) >= 3 else numeric_cols, key="pp_cols")
 
     st.markdown("---")
     st.markdown("**Toggle Steps:**")
@@ -111,7 +117,7 @@ if do_outliers:
     col_b, col_a = st.columns(2)
     with col_b:
         st.markdown("**Before**")
-        fig = px.box(working.melt(), x="variable", y="value", color="variable",
+        fig = px.box(_sample(working).melt(), x="variable", y="value", color="variable",
                      color_discrete_sequence=PALETTE, title="Before Outlier Handling")
         fig = apply_theme(fig)
         st.plotly_chart(fig, use_container_width=True)
@@ -137,7 +143,7 @@ if do_outliers:
 
     with col_a:
         st.markdown("**After**")
-        fig = px.box(working.melt(), x="variable", y="value", color="variable",
+        fig = px.box(_sample(working).melt(), x="variable", y="value", color="variable",
                      color_discrete_sequence=PALETTE, title="After Outlier Handling")
         fig = apply_theme(fig)
         st.plotly_chart(fig, use_container_width=True)
@@ -172,7 +178,7 @@ if do_normalize:
     col_b, col_a = st.columns(2)
     with col_b:
         st.markdown("**Before**")
-        fig = px.histogram(working.melt(), x="value", color="variable", barmode="overlay",
+        fig = px.histogram(_sample(working).melt(), x="value", color="variable", barmode="overlay",
                            opacity=0.6, color_discrete_sequence=PALETTE, title="Before Scaling")
         fig = apply_theme(fig)
         st.plotly_chart(fig, use_container_width=True)
@@ -192,7 +198,7 @@ if do_normalize:
 
     with col_a:
         st.markdown("**After**")
-        fig = px.histogram(working.melt(), x="value", color="variable", barmode="overlay",
+        fig = px.histogram(_sample(working).melt(), x="value", color="variable", barmode="overlay",
                            opacity=0.6, color_discrete_sequence=PALETTE, title=f"After {scaler_name}")
         fig = apply_theme(fig)
         st.plotly_chart(fig, use_container_width=True)
@@ -302,7 +308,7 @@ if do_pca and len(working.select_dtypes(include=[np.number]).columns) >= 2:
             # 2D scatter of first 2 PCs
             if n_components >= 2:
                 pca_df = pd.DataFrame(transformed[:, :2], columns=["PC1", "PC2"])
-                fig = px.scatter(pca_df, x="PC1", y="PC2", title="PCA - First 2 Components",
+                fig = px.scatter(pca_df.sample(n=min(len(pca_df), VIZ_SAMPLE), random_state=42), x="PC1", y="PC2", title="PCA - First 2 Components",
                                  color_discrete_sequence=[PALETTE[0]], opacity=0.6)
                 fig = apply_theme(fig)
                 st.plotly_chart(fig, use_container_width=True)
