@@ -23,6 +23,14 @@ html, body, [class*="st-"] {
     font-family: 'Inter', sans-serif;
 }
 
+/* Ensure uploader icons render as icons (not ligature text) on Streamlit Cloud */
+div[data-testid="stFileUploader"] span.material-symbols-rounded,
+div[data-testid="stFileUploader"] span.material-symbols-outlined {
+    font-family: "Material Symbols Rounded", "Material Symbols Outlined" !important;
+    font-style: normal;
+    line-height: 1;
+}
+
 /* Sidebar */
 section[data-testid="stSidebar"] {
     background: linear-gradient(180deg, #12141D 0%, #0E1117 100%);
